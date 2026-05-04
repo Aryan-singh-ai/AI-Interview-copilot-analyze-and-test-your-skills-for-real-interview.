@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String      @id @default(uuid())
+  clerkId    String      @unique
+  email      String      @unique
+  name       String?
+  experience Int?        // years of experience
+  role       String?     // e.g., "Software Engineer"
+  resumeUrl  String?
+  interviews Interview[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+}
+
+model Interview {
+  id            String     @id @default(uuid())
+  userId        String
+  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role          String
+  interviewType String     // "Technical", "HR", "Behavioral"
+  difficulty    String     // "Easy", "Medium", "Hard"
+  overallScore  Float?     // out of 10
+  status        String     @default("IN_PROGRESS") // "IN_PROGRESS", "COMPLETED"
+  responses     Response[]
+  createdAt     DateTime   @default(now())
+}
+
+model Response {
+  id              String    @id @default(uuid())
+  interviewId     String
+  interview       Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+  question        String
+  userAnswer      String?
+  score           Float?    // out of 10
+  feedback        String?
+  strengths       String?   // JSON string
+  weaknesses      String?   // JSON string
+  improvedAnswer  String?
+  createdAt       DateTime  @default(now())
+}
